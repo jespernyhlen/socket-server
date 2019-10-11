@@ -1,15 +1,14 @@
 const express = require('express');
 const app = express();
-const cors = require('cors');
-const bodyParser = require('body-parser');
 
-app.use(cors());
-app.options('*', cors()); // enable pre-flight
-app.use(bodyParser.json());
-const server = require('http').createServer(app);
-const io = require('socket.io')(server);
+let server = app.listen(8300, function() {
+    console.log('server is running on port 8300');
+});
 
-io.origins(['https://socket-client.jsramverk.me:443']);
+let socket = require('socket.io');
+let io = socket(server);
+
+io.origins(['https://jespernyhlenjs.me:443']);
 // io.origins(['http://localhost:3000']);
 
 io.on('connection', function(socket) {
@@ -17,9 +16,8 @@ io.on('connection', function(socket) {
     console.log(`${socket.id} is connected`);
     let user = '';
 
-    socket.broadcast.on('SEND_MESSAGE', message => {
-        console.log(message);
-
+    socket.on('SEND_MESSAGE', message => {
+        // console.log(message);
         io.emit('NEW_MESSAGE', {
             username: message.username,
             time: message.time,
@@ -29,7 +27,7 @@ io.on('connection', function(socket) {
 
     // Add user to the current session
     socket.on('JOIN_CHAT', message => {
-        console.log(message);
+        // console.log(message);
         user = message.username;
         //Echo to everyone that the user has connected.
         io.emit('NEW_MESSAGE', {
@@ -50,14 +48,12 @@ io.on('connection', function(socket) {
     });
 
     socket.on('disconnect', () => {
-        console.log('disconeeencet');
         io.emit('NEW_MESSAGE', {
             time: getTime(),
             message: `${user} has left the chat`
         });
     });
 });
-server.listen(8300);
 
 getTime = () => {
     let today = new Date();
