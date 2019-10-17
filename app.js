@@ -48,10 +48,12 @@ io.on('connection', function(socket) {
     });
 
     socket.on('disconnect', () => {
-        io.emit('NEW_MESSAGE', {
-            time: getTime(),
-            message: `${user} has left the chat`
-        });
+        if (user !== '') {
+            io.emit('NEW_MESSAGE', {
+                time: getTime(),
+                message: `${user} has left the chat`
+            });
+        }
     });
 });
 
